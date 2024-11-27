@@ -1,27 +1,27 @@
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">
-            {{ __('Profile Information') }}
+            {{ __('Thông tin cá nhân') }}
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
-            {{ __("Update your account's profile information and email address.") }}
+            {{ __("Cập nhật thông tin hồ sơ và địa chỉ email của tài khoản.") }}
         </p>
     </header>
 
     <x-splade-form method="patch" :action="route('profile.update')" :default="$user" class="mt-6 space-y-6" preserve-scroll>
-        <x-splade-input id="nik" name="nik" type="text" :label="__('NIK')" required autofocus autocomplete="nik" />
-        <x-splade-input id="nomor_handphone" name="nomor_handphone" type="text" :label="__('Nomor Handphone')" required autofocus autocomplete="nomor_handphone" />
-        <x-splade-input id="name" name="name" type="text" :label="__('Name')" required autofocus autocomplete="name" />
-        <x-splade-input id="email" name="email" type="email" :label="__('Email')" required autocomplete="email" />
+        <x-splade-input id="name" name="name" type="text" :label="__('tên tài khoản')" required autofocus autocomplete="Tên tài khoản" />
+        <x-splade-input id="role" name="role" type="text" :label="__('Chức vụ')" :value="$user->role" disabled/>
+        <x-splade-input id="phone" name="phone" type="text" :label="__('Số điện thoại')" required autofocus autocomplete="Số điện thoại" />
+        <x-splade-input id="email" name="email" type="email" :label="__('Địa chỉ email')" required autocomplete="Địa chỉ email" />
 
         @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
             <div>
                 <p class="text-sm mt-2 text-gray-800">
-                    {{ __('Your email address is unverified.') }}
+                    {{ __('Địa chỉ email của bạn chưa được xác minh.') }}
 
                     <Link method="post" href="{{ route('verification.send') }}" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        {{ __('Click here to re-send the verification email.') }}
+                        {{ __('Nhấn vào đây để gửi lại email xác minh.') }}
                     </Link>
                 </p>
 
@@ -34,11 +34,11 @@
         @endif
 
         <div class="flex items-center gap-4">
-            <x-splade-submit :label="__('Save')" />
+            <x-splade-submit :label="__('Lưu')" />
 
             @if (session('status') === 'profile-updated')
-                <p class="text-sm text-gray-600">
-                    {{ __('Saved.') }}
+                <p class="text-base text-green-500">
+                    {{ __('Đã lưu thành công.') }}
                 </p>
             @endif
         </div>

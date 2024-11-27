@@ -16,10 +16,15 @@ class ProfileController extends Controller
      */
     public function edit(Request $request)
     {
+        $user = $request->user();
+
+        // Trả về view edit profile chung, kèm theo thông tin role
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $user,
+            'role' => $user->role, // Truyền role vào view
         ]);
     }
+
 
     /**
      * Update the user's profile information.
@@ -33,7 +38,7 @@ class ProfileController extends Controller
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
-        
+
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');

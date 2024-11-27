@@ -1,3 +1,5 @@
+import defaultTheme from 'tailwindcss/defaultTheme'; // Đảm bảo import defaultTheme
+
 import forms from "@tailwindcss/forms";
 import typography from "@tailwindcss/typography";
 
@@ -15,14 +17,20 @@ export default {
         "./resources/**/*.blade.php",
         "./resources/**/*.js",
         "./resources/**/*.vue",
-        "./node_modules/flowbite/**/*.js"  
+        "./node_modules/flowbite/**/*.js"
     ],
 
     theme: {
-        extend: {},
+        extend: {
+            fontFamily: {
+                sans: ['Nunito', ...defaultTheme.fontFamily.sans], // Sử dụng defaultTheme.fontFamily.sans
+            },
+        },
     },
 
     plugins: [
         require('flowbite/plugin'),
-        forms, typography],
+        forms,
+        typography
+    ],
 };

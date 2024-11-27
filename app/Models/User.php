@@ -20,10 +20,10 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'phone',
         'email',
-        'nik',
-        'nomor_handphone',
         'password',
+        'role',
     ];
 
     /**
@@ -45,4 +45,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function repairs()
+    {
+        return $this->hasMany(Repair::class);
+    }
 }

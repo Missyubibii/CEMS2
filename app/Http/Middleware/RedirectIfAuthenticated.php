@@ -21,9 +21,20 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+                $user = Auth::guard($guard)->user();
+
+                // Redirect based on the user's role
+                if ($user->role === 'Admin') {
+                    return redirect(RouteServiceProvider::ADMIN_HOME);
+                } elseif ($user->role === 'Giáo viên') {
+                    return redirect(RouteServiceProvider::TEACHER_HOME);
+                }
+
+                // Default redirect if no specific role
                 return redirect(RouteServiceProvider::HOME);
             }
         }
+
         return $next($request);
     }
 }

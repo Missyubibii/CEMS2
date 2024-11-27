@@ -1,19 +1,18 @@
 <x-guest-layout>
     <x-auth-card>
         <x-splade-form action="{{ route('register') }}" class="space-y-4">
-            <x-splade-input id="nik" name="nik" :label="__('NIK')" required />
-            <x-splade-input id="name" type="text" name="name" :label="__('Name')" required autofocus />
-            <x-splade-input id="nomor_handphone" name="nomor_handphone" :label="__('Nomor Handphone')" required autofocus />
-            <x-splade-input id="email" type="email" name="email" :label="__('Email')" required />
+            <x-splade-input id="name" type="text" name="name" :label="__('Họ và tên')" required autofocus />
+            <x-splade-input id="phone" name="phone" :label="__('Số điện thoại')" required autofocus />
+            <x-splade-input id="email" type="email" name="email" :label="__('địa chỉ Email')" required />
             <x-splade-input id="password" type="password" name="password" :label="__('Password')" required autocomplete="new-password" />
             <x-splade-input id="password_confirmation" type="password" name="password_confirmation" :label="__('Confirm Password')" required />
 
             <div class="flex items-center justify-end">
                 <Link class="underline text-sm text-gray-600 hover:text-gray-900" href="{{ route('login') }}">
-                    {{ __('Already registered?') }}
+                    {{ __('Đã có tài khoản?') }}
                 </Link>
 
-                <x-splade-submit class="ml-4" :label="__('Register')" />
+                <x-splade-submit class="ml-4" :label="__('Đăng ký')" />
             </div>
         </x-splade-form>
     </x-auth-card>
