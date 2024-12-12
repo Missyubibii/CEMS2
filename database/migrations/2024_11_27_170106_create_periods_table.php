@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('periods', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // Tên tiết (Ví dụ: Tiết 1, Tiết 2, ...)
-            $table->time('start_time'); // Thời gian bắt đầu
-            $table->time('end_time'); // Thời gian kết thúc
+            $table->string('name'); // Tên tiết học (ví dụ: Tiết 1, Tiết 2)
+            $table->time('start_time'); // Giờ bắt đầu
+            $table->time('end_time');   // Giờ kết thúc
             $table->timestamps();
         });
     }

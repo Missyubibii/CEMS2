@@ -181,7 +181,7 @@
                 </div>
             </div>
 
-            {{-- <form id="add_rooms" tabindex="-1" aria-hidden="true"
+            <form id="add_rooms" tabindex="-1" aria-hidden="true"
                 class="hidden fixed top-0 left-0 w-full h-full items-center justify-center bg-black bg-opacity-50 z-50">
                 <div class="relative w-full max-w-2xl bg-white rounded-lg shadow dark:bg-gray-800">
                     <div class="flex justify-between items-center p-4 border-b dark:border-gray-600">
@@ -292,7 +292,7 @@
                         </div>
                     </form>
                 </div>
-            </form> --}}
+            </form>
 
 
             <!-- Phân trang cho địa chỉ phòng học -->

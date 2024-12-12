@@ -67,17 +67,11 @@ Route::middleware('splade')->group(function () {
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy'); // Xóa thiết bị
 
         Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
-        Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store'); // Thêm phòng học
+        Route::get('/rooms/store', [RoomController::class, 'create'])->name('rooms.create');
+        Route::post('/rooms/store', [RoomController::class, 'store'])->name('rooms.store');
         Route::get('/rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit'); // Sửa phòng học
         Route::put('/admin/rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
         Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy'); // Xóa phòng học
-
-        // Routes cho địa chỉ phòng học
-        Route::get('/room_addresses', [RoomAddressController::class, 'index'])->name('room_addresses.index'); // Hiển thị danh sách địa chỉ
-        Route::post('/room_addresses', [RoomAddressController::class, 'store'])->name('room_addresses.store'); // Thêm địa chỉ mới
-        Route::get('/room_addresses/{roomAddress}/edit', [RoomAddressController::class, 'edit'])->name('room_addresses.edit'); // Form chỉnh sửa địa chỉ
-        Route::put('/room_addresses/{roomAddress}', [RoomAddressController::class, 'update'])->name('room_addresses.update'); // Cập nhật địa chỉ
-        Route::delete('/room_addresses/{roomAddress}', [RoomAddressController::class, 'destroy'])->name('room_addresses.destroy'); // Xóa địa chỉ
 
         // Routes cho Tòa nhà
         Route::get('/buildings', [BuildingController::class, 'index'])->name('buildings.index'); // Hiển thị danh sách tòa nhà
@@ -97,12 +91,12 @@ Route::middleware('splade')->group(function () {
 
         // Route cho đặt phòng
         Route::get('/room-bookings', [RoomBookingController::class, 'index'])->name('room_bookings.index');
-        Route::post('/room-bookings', [RoomBookingController::class, 'store'])->name('room_bookings.store');
+        Route::get('/room_bookings/create', [RoomBookingController::class, 'create'])->name('room_bookings.create');
+        Route::post('/room_bookings', [RoomBookingController::class, 'store'])->name('room_bookings.store');
         Route::get('/room-bookings/{id}/edit', [RoomBookingController::class, 'edit'])->name('room_bookings.edit');
         Route::put('/room-bookings/{id}', [RoomBookingController::class, 'update'])->name('room_bookings.update');
         Route::delete('/room-bookings/{id}', [RoomBookingController::class, 'destroy'])->name('room_bookings.destroy');
         Route::get('/room-bookings/{id}/status/{status}', [RoomBookingController::class, 'updateStatus'])->name('room_bookings.updateStatus');
-
         // Route::resource('/repairs', RepairController::class);
     });
 
@@ -113,7 +107,11 @@ Route::middleware('splade')->group(function () {
             return view('teacher.dashboard');
         })->name('teacher.dashboard');
 
-
+        Route::get('/room-bookings', [RoomBookingController::class, 'index'])->name('room_bookings.index');
+        Route::post('/room-bookings', [RoomBookingController::class, 'store'])->name('room_bookings.store');
+        Route::get('/room-bookings/{id}/edit', [RoomBookingController::class, 'edit'])->name('room_bookings.edit');
+        Route::put('/room-bookings/{id}', [RoomBookingController::class, 'update'])->name('room_bookings.update');
+        Route::delete('/room-bookings/{id}', [RoomBookingController::class, 'destroy'])->name('room_bookings.destroy');
     });
 
 

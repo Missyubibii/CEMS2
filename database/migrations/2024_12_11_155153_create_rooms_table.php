@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateRoomsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,11 @@ class CreateRoomsTable extends Migration
     {
             Schema::create('rooms', function (Blueprint $table) {
                 $table->id();
-                $table->foreignId('room_address_id')->constrained('room_addresses')->onDelete('cascade');
-                $table->integer('capacity'); // Sức chứa
-                $table->enum('status', ['Còn trống', 'Đang sử dụng', 'Đang bảo trì']); // Trạng thái
+                $table->string('room_name');
+                $table->foreignId('building_id')->constrained('buildings')->onDelete('cascade');
+                $table->foreignId('campus_id')->constrained('campuses')->onDelete('cascade');
+                $table->integer('capacity');
+                $table->enum('status', ['Còn trống', 'Đang sử dụng', 'Đang bảo trì']);
                 $table->timestamps();
             });
     }
@@ -27,4 +29,4 @@ class CreateRoomsTable extends Migration
     {
         Schema::dropIfExists('rooms');
     }
-}
+};

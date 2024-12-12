@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Campus;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CampusController extends Controller
 {
@@ -13,10 +14,6 @@ class CampusController extends Controller
         return view('admin.campuses.index', compact('campuses'));
     }
 
-    public function create()
-    {
-        return view('admin.campuses.create');
-    }
 
     public function store(Request $request)
     {
@@ -39,15 +36,25 @@ class CampusController extends Controller
     public function update(Request $request, Campus $campus)
     {
         $request->validate([
-            'campus_name' => 'required|string|max:255',
+            'campus_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('campuses', 'campus_name')->ignore($campus->id),
+            ],
+        ], [
+            'campus_name.unique' => 'Tên cơ sở học đã tồn tại. Vui lòng nhập tên khác.',
         ]);
 
+        // Cập nhật cơ sở học
         $campus->update([
             'campus_name' => $request->campus_name,
         ]);
 
-        return redirect()->route('admin.campuses.index')->with('success', 'Cơ sở đã được cập nhật.');
+        // Chuyển hướng về trang danh sách với thông báo thành công
+        return redirect()->route('admin.campuses.index')->with('success', 'Cơ sở học đã được cập nhật.');
     }
+
 
     public function destroy(Campus $campus)
     {

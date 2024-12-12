@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\RoomBookingDevice;
 
 class Device extends Model
 {
@@ -20,4 +21,10 @@ class Device extends Model
         'category',
         'status',
     ];
+
+    public function roomBookingDevices()
+    {
+        return $this->hasMany(RoomBookingDevice::class);
+    }
+
 }

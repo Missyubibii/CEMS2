@@ -2,82 +2,106 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Room;
-use App\Models\User;
-use App\Models\RoomAddress;
+use App\Models\Device;
+use App\Models\Period;
 use App\Models\RoomBooking;
+use Illuminate\Http\Request;
 
 class RoomBookingController extends Controller
 {
     public function index()
     {
-        // Lấy tất cả các đơn đặt phòng với thông tin liên quan và phân trang
-        $roomBookings = RoomBooking::with(['user', 'room', 'roomAddress'])->paginate(10); // Phân trang 10 đơn mỗi trang
-
-        // Truyền dữ liệu vào view
+        $roomBookings = RoomBooking::with(['user', 'room', 'startPeriod', 'endPeriod', 'devices'])
+            ->paginate(5);
         $rooms = Room::all();
-        $users = User::all();
-        $roomAddresses = RoomAddress::all();
+        $periods = Period::all();
+        $devices = Device::all();
 
-        return view('admin.room_bookings.index', compact('roomBookings', 'rooms', 'users', 'roomAddresses'));
+        return view('admin.room_bookings.index', compact('roomBookings', 'rooms', 'periods', 'devices'));
+    }
+
+    private function validateRoomBooking(Request $request)
+    {
+        return $request->validate([
+            'room_id' => 'required|exists:rooms,id',
+            'room_address_id' => 'required|exists:room_addresses,id',
+            'start_period_id' => 'required|exists:periods,id',
+            'end_period_id' => 'required|exists:periods,id|gte:start_period_id',
+            'purpose' => 'required|string|max:255',
+            'devices.*.quantity' => 'nullable|integer|min:1',
+        ]);
     }
 
     public function create()
     {
-        // Không cần tạo action riêng cho create, vì form sẽ nằm trong trang index
+        $rooms = Room::all();  // Lấy danh sách phòng học
+        $devices = Device::all();  // Lấy danh sách thiết bị học
+        return view('admin.room_bookings.create', compact('rooms', 'devices'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required',
-            'room_id' => 'required',
-            'room_address_id' => 'required',
-            'time_slot' => 'required',
-        ]);
+        // Validate dữ liệu từ form
+        $this->validateRoomBooking($request);
 
-        RoomBooking::create([
-            'user_id' => $request->user_id,
+        // Kiểm tra số lượng thiết bị
+        $deviceQuantities = $request->input('device_quantity', []);
+        $devices = $request->input('devices', []);
+
+        foreach ($devices as $index => $deviceId) {
+            $device = Device::find($deviceId);
+            $quantity = $deviceQuantities[$index] ?? 0;
+
+            // Kiểm tra số lượng thiết bị có đủ không
+            if ($device && $device->quantity < $quantity) {
+                return back()->withErrors([
+                    'device_quantity' => "Số lượng thiết bị '{$device->device_name}' không đủ."
+                ]);
+            }
+        }
+
+        // Tạo phòng học và lưu thông tin thiết bị mượn
+        $roomBooking = RoomBooking::create([
+            'user_id' => auth()->id(),
             'room_id' => $request->room_id,
-            'room_address_id' => $request->room_address_id,
-            'time_slot' => $request->time_slot,
-            'status' => 'Chờ duyệt', // Mặc định trạng thái là "Chờ duyệt"
+            'start_period_id' => $request->start_period_id,
+            'end_period_id' => $request->end_period_id,
+            'purpose' => $request->purpose,
+            'status' => $request->status,
         ]);
 
-        return redirect()->route('admin.room_bookings.index');
-    }
+        // Lưu thông tin thiết bị mượn
+        foreach ($devices as $index => $deviceId) {
+            $deviceQuantity = $deviceQuantities[$index];
 
-    public function edit($id)
-    {
-        // Lấy thông tin đơn đặt phòng để chỉnh sửa
-        $roomBooking = RoomBooking::findOrFail($id);
-        $rooms = Room::all();
-        $users = User::all();
-        $roomAddresses = RoomAddress::all();
+            // Gắn thiết bị với số lượng đã mượn
+            $roomBooking->devices()->attach($deviceId, ['quantity' => $deviceQuantity]);
 
-        return view('admin.room_bookings.edit', compact('roomBooking', 'rooms', 'users', 'roomAddresses'));
+            // Cập nhật lại số lượng thiết bị trong bảng devices
+            $device = Device::find($deviceId);
+            $device->quantity -= $deviceQuantity;
+            $device->save();
+        }
+
+        return redirect()->route('admin.room_bookings.index')->with('success', 'Đặt phòng thành công!');
     }
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'user_id' => 'required',
-            'room_id' => 'required',
-            'room_address_id' => 'required',
-            'time_slot' => 'required',
-        ]);
+        $this->validateRoomBooking($request);
 
         $roomBooking = RoomBooking::findOrFail($id);
+
         $roomBooking->update([
-            'user_id' => $request->user_id,
             'room_id' => $request->room_id,
             'room_address_id' => $request->room_address_id,
-            'time_slot' => $request->time_slot,
-            'status' => $request->status, // Cập nhật trạng thái nếu cần
+            'start_period_id' => $request->start_period_id,
+            'end_period_id' => $request->end_period_id,
+            'purpose' => $request->purpose,
         ]);
 
-        return redirect()->route('admin.room_bookings.index');
+        return redirect()->route('admin.room_bookings.index')->with('success', 'Cập nhật thành công!');
     }
 
     public function destroy($id)
@@ -85,17 +109,16 @@ class RoomBookingController extends Controller
         $roomBooking = RoomBooking::findOrFail($id);
         $roomBooking->delete();
 
-        return redirect()->route('admin.room_bookings.index');
+        return redirect()->route('admin.room_bookings.index')->with('success', 'Xóa thành công!');
     }
 
     public function updateStatus($id, $status)
     {
         $roomBooking = RoomBooking::findOrFail($id);
-        $roomBooking->status = $status;
-        $roomBooking->save();
+        $roomBooking->update(['status' => $status]);
 
-        return redirect()->route('admin.room_bookings.index');
+        $roomBooking->room->update(['status' => $status === 'Đang sử dụng' ? 'Đang sử dụng' : 'Còn trống']);
+
+        return redirect()->route('admin.room_bookings.index')->with('success', 'Trạng thái đã được cập nhật!');
     }
 }
-
-

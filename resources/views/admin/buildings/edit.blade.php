@@ -12,12 +12,20 @@
                 <div class="grid gap-4 mb-4 sm:grid-cols-2 sm:gap-6 sm:mb-5">
                     <div class="sm:col-span-2">
                         <label for="building_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                            Tên phòng học
+                            Tên tòa nhà
                         </label>
                         <input type="text" id="building_name" name="building_name"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            value="{{ old('nbuilding_name', $building->building_name) }}" required
-                            placeholder="Nhập tên tòa học..." required>
+                            class="bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full p-2.5
+                            focus:ring-blue-600 focus:border-blue-600 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white
+                            dark:focus:ring-blue-500 dark:focus:border-blue-500
+                            {{ $errors->has('building_name') ? 'border-red-500 dark:border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600' }}"
+                            value="{{ old('building_name', $building->building_name) }}" required
+                            placeholder="Nhập tên tòa học...">
+                        @error('building_name')
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-500 flex items-center">
+                                {{ $message }}
+                            </div>
+                        @enderror
                     </div>
 
                     <div class="flex items-center space-x-4">
@@ -47,7 +55,7 @@
                                     d="M14.5 8.046H11V6.119c0-.921-.9-1.446-1.524-.894l-5.108 4.49a1.2 1.2 0 0 0 0 1.739l5.108 4.49c.624.556 1.524.027 1.524-.893v-1.928h2a3.023 3.023 0 0 1 3 3.046V19a5.593 5.593 0 0 0-1.5-10.954Z" />
                             </svg>
 
-                            <a href="{{ url('/admin/campuses') }}">Hủy</a>
+                            <a href="{{ url('/admin/buildings') }}">Hủy</a>
                         </button>
                     </div>
                 </div>

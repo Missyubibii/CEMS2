@@ -56,12 +56,6 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ url('/admin/room_addresses') }}"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-5 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                            Địa chỉ phòng học
-                        </a>
-                    </li>
-                    <li>
                         <a href="{{ url('/admin/campuses') }}"
                             class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-5 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
                             Cơ sở học

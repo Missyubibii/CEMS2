@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Building;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class BuildingController extends Controller
 {
@@ -11,11 +12,6 @@ class BuildingController extends Controller
     {
         $buildings = Building::all();
         return view('admin.buildings.index', compact('buildings'));
-    }
-
-    public function create()
-    {
-        return view('admin.buildings.create');
     }
 
     public function store(Request $request)
@@ -39,7 +35,14 @@ class BuildingController extends Controller
     public function update(Request $request, Building $building)
     {
         $request->validate([
-            'building_name' => 'required|string|max:255',
+            'building_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('buildings', 'building_name')->ignore($building->id),
+            ],
+        ], [
+            'building_name.unique' => 'Tên tòa nhà đã tồn tại. Vui lòng nhập tên khác.',
         ]);
 
         $building->update([

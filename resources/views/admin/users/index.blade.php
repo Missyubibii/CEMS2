@@ -99,9 +99,9 @@
 
                                             Sửa
                                         </a>
-                                        <button
-                                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300"
-                                            onclick="document.getElementById('delete-{{ $user->id }}').submit();">
+                                        <button data-modal-target="deleteModal-{{ $user->id }}"
+                                            data-modal-toggle="deleteModal-{{ $user->id }}"
+                                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300">
                                             <svg class="w-3.5 h-3.5 mr-2 text-gray-300 dark:text-white"
                                                 aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
                                                 height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -111,11 +111,35 @@
                                             </svg>
                                             Xóa
                                         </button>
-                                        <form id="delete-{{ $user->id }}" method="POST"
-                                            action="{{ route('admin.users.destroy', $user) }}" style="display: none;">
-                                            @csrf
-                                            @method('DELETE')
-                                        </form>
+
+                                        <div id="deleteModal-{{ $user->id }}" tabindex="-1"
+                                            class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full">
+                                            <div class="relative w-full h-full max-w-md md:h-auto">
+                                                <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                                                    <div class="p-6 text-center">
+                                                        <h3
+                                                            class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                                                            Bạn có chắc chắn muốn xóa tài khoản này?
+                                                        </h3>
+                                                        <form id="delete-{{ $user->id }}" method="POST"
+                                                            class="space-x-2 whitespace-nowrap"
+                                                            action="{{ route('admin.users.destroy', $user) }}">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                class=" text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 rounded-lg text-sm px-5 py-2.5 text-center">
+                                                                Xóa
+                                                            </button>
+                                                            <button type="button"
+                                                                class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10"
+                                                                data-modal-hide="deleteModal-{{ $user->id }}">
+                                                                Hủy
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

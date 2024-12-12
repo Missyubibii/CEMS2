@@ -15,9 +15,18 @@
                             Tên cơ sở học
                         </label>
                         <input type="text" id="campus_name" name="campus_name"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            value="{{ old('ncampus_name', $campus->campus_name) }}" required
-                            placeholder="Nhập tên tòa học..." required>
+                            class="bg-gray-50 border text-gray-900 text-sm rounded-lg block w-full p-2.5
+                            focus:ring-blue-600 focus:border-blue-600 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white
+                            dark:focus:ring-blue-500 dark:focus:border-blue-500
+                            {{ $errors->has('campus_name') ? 'border-red-500 dark:border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600' }}"
+                            value="{{ old('campus_name', $campus->campus_name) }}" required
+                            placeholder="Nhập tên cơ sở học...">
+
+                        @error('campus_name')
+                            <div class="mt-2 text-sm text-red-600 dark:text-red-500 flex items-center">
+                                {{ $message }}
+                            </div>
+                        @enderror
                     </div>
 
                     <div class="flex items-center space-x-4">

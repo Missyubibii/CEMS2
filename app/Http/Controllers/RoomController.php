@@ -3,43 +3,57 @@
 namespace App\Http\Controllers;
 
 use App\Models\Room;
-use App\Models\RoomAddress;
+use App\Models\Building;
+use App\Models\Campus;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class RoomController extends Controller
 {
     public function index()
     {
-        // Phân trang phòng học, mỗi trang 5 phòng học
-        $rooms = Room::with('roomAddress')->paginate(5);
-
-        // Phân trang địa chỉ phòng học, mỗi trang 5 địa chỉ
-        $roomAddresses = RoomAddress::paginate(5);
+        $rooms = Room::paginate(10);
+        // Lấy danh sách tòa nhà và cơ sở
+        $buildings = Building::all();
+        $campuses = Campus::all();
 
         // Trả dữ liệu sang view
-        return view('admin.rooms.index', compact('rooms', 'roomAddresses'));
+        return view('admin.rooms.index', compact('rooms', 'buildings', 'campuses'));
     }
 
+    public function create()
+    {
+        $buildings = Building::all();
+        $campuses = Campus::all();
+
+        return view('admin.rooms.store', compact('buildings', 'campuses'));
+    }
 
     public function store(Request $request)
     {
-        // Validate input
-        $validatedData = $request->validate([
-            'room_name' => 'required|string|max:255',
-            'room_address_id' => 'required|exists:room_addresses,id',
+        $request->validate([
+            'room_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('rooms', 'room_name'),
+            ],
+            'building_id' => 'required|exists:buildings,id',
+            'campus_id' => 'required|exists:campuses,id',
             'capacity' => 'required|integer|min:1',
             'status' => 'required|in:Còn trống,Đang sử dụng,Đang bảo trì',
+        ], [
+            'room_name.unique' => 'Tên phòng học đã tồn tại. Vui lòng nhập tên khác.',
         ]);
 
         // Tạo phòng học mới
         Room::create([
             'room_name' => $request->room_name,
-            'room_address_id' => $request->room_address_id, // Lưu giá trị room_address_id
+            'building_id' => $request->building_id,
+            'campus_id' => $request->campus_id,
             'capacity' => $request->capacity,
             'status' => $request->status,
         ]);
-
-        // dd($request->all());
 
         // Redirect về danh sách với thông báo
         return redirect()->route('admin.rooms.index')->with('success', 'Thêm phòng học thành công!');
@@ -48,33 +62,38 @@ class RoomController extends Controller
     public function edit(Room $room)
     {
         // Lấy tất cả địa chỉ phòng học
-        $roomAddresses = RoomAddress::with(['building', 'campus'])->get();
+        // $roomAddresses = RoomAddress::with(['building', 'campus'])->get();
+        $buildings = Building::all(); // Lấy danh sách tòa nhà
+        $campuses = Campus::all();   // Lấy danh sách cơ sở
 
         // Truyền biến $room và $roomAddresses vào view
-        return view('admin.rooms.edit', compact('room', 'roomAddresses'));
+        return view('admin.rooms.edit', compact('room', 'buildings', 'campuses'));
     }
 
     public function update(Request $request, Room $room)
     {
-        // Validate dữ liệu
         $request->validate([
-            'room_name' => 'required|string|max:255',
-            'room_address_id' => 'required|exists:room_addresses,id',
+            'room_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('rooms', 'room_name')->ignore($room->id),
+            ],
+            'building_id' => 'required|exists:buildings,id',
+            'campus_id' => 'required|exists:campuses,id',
             'capacity' => 'required|integer|min:1',
             'status' => 'required|string|in:Còn trống,Đang sử dụng,Đang bảo trì',
+        ], [
+            'room_name.unique' => 'Tên phòng đã tồn tại. Vui lòng nhập tên khác.',
         ]);
 
-        // Cập nhật thông tin phòng học
-        $room->update([
-            'room_name' => $request->room_name,
-            'room_address_id' => $request->room_address_id,
-            'capacity' => $request->capacity,
-            'status' => $request->status,
-        ]);
+        // Cập nhật thông tin phòng
+        $room->update($request->all());
 
-        // Redirect về danh sách phòng học
-        return redirect()->route('admin.rooms.index')->with('success', 'Cập nhật thông tin phòng học thành công!');
+        return redirect()->route('admin.rooms.index')
+            ->with('success', 'Thông tin phòng đã được cập nhật thành công!');
     }
+
 
     public function destroy(Room $room)
     {

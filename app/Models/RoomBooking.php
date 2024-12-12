@@ -4,11 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Period;
 
 class RoomBooking extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'user_id', 'room_id', 'room_address_id', 'status', 'time_slot'
+        'user_id',
+        'room_id',
+        'start_period_id',
+        'end_period_id',
+        'booking_date',
+        'purpose',
+        'status',
     ];
 
     public function user()
@@ -21,9 +30,22 @@ class RoomBooking extends Model
         return $this->belongsTo(Room::class);
     }
 
-    public function roomAddress()
+    public function startPeriod()
     {
-        return $this->belongsTo(RoomAddress::class);
+        return $this->belongsTo(Period::class, 'start_period_id');
+    }
+
+    public function endPeriod()
+    {
+        return $this->belongsTo(Period::class, 'end_period_id');
+    }
+
+    public function devices()
+    {
+        return $this->belongsToMany(Device::class, 'room_booking_devices')->withPivot('quantity');
     }
 }
+
+
+
 
