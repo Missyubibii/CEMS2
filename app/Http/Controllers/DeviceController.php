@@ -9,7 +9,7 @@ class DeviceController extends Controller
 {
     public function index()
     {
-        $devices = Device::all();
+        $devices = Device::paginate(5);
         return view('admin.devices.index', compact('devices'));
     }
 

@@ -11,9 +11,5 @@ class Campus extends Model
 
     protected $fillable = ['campus_name'];
 
-    public function roomAddresses()
-    {
-        return $this->hasMany(RoomAddress::class);
-    }
 }
 

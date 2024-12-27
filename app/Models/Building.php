@@ -11,9 +11,5 @@ class Building extends Model
 
     protected $fillable = ['building_name'];
 
-    public function roomAddresses()
-    {
-        return $this->hasMany(RoomAddress::class);
-    }
 }
 

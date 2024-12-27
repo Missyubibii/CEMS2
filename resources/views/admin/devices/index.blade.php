@@ -229,6 +229,9 @@
                     </div>
                 </div>
                 </form>
+                <div class="mt-4">
+                    {{ $devices->links() }}
+                </div>
             </div>
         </div>
 </x-app-layout>

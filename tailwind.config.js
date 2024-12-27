@@ -17,19 +17,21 @@ export default {
         "./resources/**/*.blade.php",
         "./resources/**/*.js",
         "./resources/**/*.vue",
-        "./node_modules/flowbite/**/*.js"
+        "./node_modules/flowbite/**/*.js",
+        "./node_modules/preline/dist/*.js"
     ],
 
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Nunito', ...defaultTheme.fontFamily.sans], // Sử dụng defaultTheme.fontFamily.sans
+                sans: ['Nunito', ...defaultTheme.fontFamily.sans],
             },
         },
     },
 
     plugins: [
         require('flowbite/plugin'),
+        require('preline/plugin'),
         forms,
         typography
     ],

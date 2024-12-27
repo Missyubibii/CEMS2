@@ -12,7 +12,7 @@ class RoomController extends Controller
 {
     public function index()
     {
-        $rooms = Room::paginate(10);
+        $rooms = Room::paginate(5);
         // Lấy danh sách tòa nhà và cơ sở
         $buildings = Building::all();
         $campuses = Campus::all();
@@ -31,19 +31,23 @@ class RoomController extends Controller
 
     public function store(Request $request)
     {
+        // Kiểm tra nếu phòng học đã tồn tại trong cùng tòa học và cơ sở
         $request->validate([
             'room_name' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('rooms', 'room_name'),
+                Rule::unique('rooms')->where(function ($query) use ($request) {
+                    return $query->where('building_id', $request->building_id)
+                                 ->where('campus_id', $request->campus_id);
+                }),
             ],
             'building_id' => 'required|exists:buildings,id',
             'campus_id' => 'required|exists:campuses,id',
             'capacity' => 'required|integer|min:1',
             'status' => 'required|in:Còn trống,Đang sử dụng,Đang bảo trì',
         ], [
-            'room_name.unique' => 'Tên phòng học đã tồn tại. Vui lòng nhập tên khác.',
+            'room_name.unique' => 'Tên phòng học đã tồn tại trong Tòa học và Cơ sở này. Vui lòng nhập tên khác.',
         ]);
 
         // Tạo phòng học mới
