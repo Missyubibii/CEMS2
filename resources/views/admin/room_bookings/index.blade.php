@@ -5,21 +5,6 @@
 
     <div class="p-4 sm:ml-64 sm:p-5">
         <div class="overflow-x-auto rounded-lg">
-            <div class="flex flex-col md:flex-row items-center justify-end space-y-3 md:space-y-0 md:space-x-4 p-4">
-                <div
-                    class="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
-                    <a href="{{ route('admin.room_bookings.create') }}" id="add_room_bookings_button" type="button"
-                        class="flex items-center justify-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                        <svg class="w-3.5 h-3.5 mr-2 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                            width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                        </svg>
-
-                        Đặt phòng - thiết bị
-                    </a>
-                </div>
-            </div>
             <div class="inline-block min-w-full align-middle">
                 <div class="bg-white overflow-hidden shadow sm:rounded-lg">
                     <table class="table-auto w-full mt-4 divide-y divide-gray-200 dark:divide-gray-600">
@@ -65,6 +50,29 @@
                                     <td class="p-4 text-sm font-normal text-gray-900 whitespace-nowrap dark:text-white">
                                         {{ $roomBooking->status }}
                                     </td>
+                                    <td class="p-4 whitespace-nowrap">
+                                        @if ($roomBooking->status === 'Chờ duyệt')
+                                            <span
+                                                class="bg-gray-400 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md ">
+                                                {{ $roomBooking->status }}
+                                            </span>
+                                        @elseif ($roomBooking->status === 'Từ chối duyệt')
+                                            <span
+                                                class="bg-red-400 text-red-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md ">
+                                                {{ $roomBooking->status }}
+                                            </span>
+                                        @elseif ($roomBooking->status === 'Đang sử dụng')
+                                            <span
+                                                class="bg-green-400 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md ">
+                                                {{ $roomBooking->status }}
+                                            </span>
+                                        @elseif ($roomBooking->status === 'Đã trả phòng')
+                                            <span
+                                                class="bg-yellow-400 text-yellow-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md ">
+                                                {{ $roomBooking->status }}
+                                            </span>
+                                        @endif
+                                    </td>
                                     <td class="p-4 space-x-2 whitespace-nowrap">
                                         @if ($roomBooking->status === 'Chờ duyệt')
                                             <form method="POST"
@@ -96,7 +104,7 @@
                                                 @method('PUT')
                                                 <button type="submit"
                                                     class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300">
-                                                    Đã trả phòng
+                                                    Trả phòng
                                                 </button>
                                             </form>
                                         @endif

@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        {{ __('Dashboard') }}
+        {{ __('Chào mừng') }}
     </x-slot>
 
     <div class="p-4 h-full sm:ml-64">

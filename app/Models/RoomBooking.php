@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Period;
 
+
 class RoomBooking extends Model
 {
     use HasFactory;
@@ -44,6 +45,19 @@ class RoomBooking extends Model
     {
         return $this->belongsToMany(Device::class, 'room_booking_devices')->withPivot('quantity');
     }
+
+    public function isConflict(RoomBooking $newBooking)
+    {
+        return RoomBooking::where('room_id', $newBooking->room_id)
+            ->where('booking_date', $newBooking->booking_date)
+            ->where(function ($query) use ($newBooking) {
+                // Kiểm tra nếu các tiết học trùng
+                $query->whereBetween('start_period_id', [$newBooking->start_period_id, $newBooking->end_period_id])
+                    ->orWhereBetween('end_period_id', [$newBooking->start_period_id, $newBooking->end_period_id]);
+            })
+            ->exists();
+    }
+
 }
 
 

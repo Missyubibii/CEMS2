@@ -8,6 +8,7 @@ use App\Http\Controllers\BuildingController;
 use App\Http\Controllers\CampusController;
 use App\Http\Controllers\RepairController;
 use App\Http\Controllers\AdminRoomBookingController;
+use App\Http\Controllers\RoomBookingController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -38,7 +39,7 @@ Route::middleware('splade')->group(function () {
     Route::get('/', function () {
         return view('welcome');
     });
-    
+
     Route::get('/about', function () {
         return view('about'); // view 'about' là trang bạn muốn hiển thị
     })->name('about');
@@ -47,6 +48,11 @@ Route::middleware('splade')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+        // Routes for Room Bookings
+        Route::get('/room-bookings/create', [RoomBookingController::class, 'create'])->name('room_bookings.create'); // Show the form (GET)
+        Route::post('/room-bookings', [RoomBookingController::class, 'store'])->name('room_bookings.store');
+        Route::get('/room-bookings/timetable', [RoomBookingController::class, 'timetable'])->name('room_bookings.timetable'); // Show the timetable
     });
 
 
@@ -102,6 +108,9 @@ Route::middleware('splade')->group(function () {
         Route::put('/room-bookings/{roomBooking}/approve', [AdminRoomBookingController::class, 'approve'])->name('room_bookings.approve');
         Route::put('/room-bookings/{roomBooking}/reject', [AdminRoomBookingController::class, 'reject'])->name('room_bookings.reject');
         Route::put('room_bookings/{roomBooking}/returnRoom', [AdminRoomBookingController::class, 'returnRoom'])->name('room_bookings.returnRoom');
+
+        Route::get('/room-bookings/approval', [RoomBookingController::class, 'adminApproval'])->name('admin.room_bookings.approval');
+        Route::post('/room-bookings/{id}/status', [RoomBookingController::class, 'updateStatus'])->name('admin.room_bookings.updateStatus');
 
         // Route::resource('/repairs', RepairController::class);
     });
