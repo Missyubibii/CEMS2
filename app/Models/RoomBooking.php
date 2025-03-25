@@ -43,7 +43,8 @@ class RoomBooking extends Model
 
     public function devices()
     {
-        return $this->belongsToMany(Device::class, 'room_booking_devices')->withPivot('quantity');
+        return $this->belongsToMany(Device::class, 'room_booking_device')
+                    ->withPivot('quantity');
     }
 
     public function isConflict(RoomBooking $newBooking)

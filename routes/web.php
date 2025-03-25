@@ -49,10 +49,12 @@ Route::middleware('splade')->group(function () {
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-        // Routes for Room Bookings
-        Route::get('/room-bookings/create', [RoomBookingController::class, 'create'])->name('room_bookings.create'); // Show the form (GET)
-        Route::post('/room-bookings', [RoomBookingController::class, 'store'])->name('room_bookings.store');
-        Route::get('/room-bookings/timetable', [RoomBookingController::class, 'timetable'])->name('room_bookings.timetable'); // Show the timetable
+        Route::get('/room_bookings/create', [RoomBookingController::class, 'create'])->name('room_bookings.create');
+        Route::post('/room_bookings', [RoomBookingController::class, 'store'])->name('room_bookings.store');
+        Route::get('/room_bookings/timetable', [RoomBookingController::class, 'timetable'])->name('room_bookings.timetable');
+        Route::delete('/room_bookings/timetable/{timetable}', [RoomBookingController::class, 'destroy'])->name('room_bookings.destroy');
+        Route::get('/room_bookings/timetable/{timetable}/edit', [RoomBookingController::class, 'edit'])->name('room_bookings.edit');
+        Route::put('/room_bookings/timetable/{timetable}', [RoomBookingController::class, 'update'])->name('room_bookings.update');
     });
 
 

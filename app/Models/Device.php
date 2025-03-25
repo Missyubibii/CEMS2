@@ -27,4 +27,10 @@ class Device extends Model
         return $this->hasMany(RoomBookingDevice::class);
     }
 
+    public function roomBookings()
+    {
+        return $this->belongsToMany(RoomBooking::class, 'room_booking_device')
+            ->withPivot('quantity');
+    }
+
 }

@@ -11,123 +11,207 @@ use Illuminate\Http\Request;
 
 class RoomBookingController extends Controller
 {
-    // Hiển thị danh sách đơn đặt phòng
-    public function index()
+    public function timetable()
     {
-        $roomBookings = RoomBooking::with(['user', 'room', 'startPeriod', 'endPeriod'])->get();
-        return view('admin.room_bookings.index', compact('roomBookings'));
+        $roomBookings = RoomBooking::with(['room', 'startPeriod', 'endPeriod', 'user', 'devices'])
+            ->orderBy('booking_date', 'desc')
+            ->get();
+
+        return view('room_bookings.timetable', compact('roomBookings'));
     }
 
-    public function create(Request $request)
+    // Kiểm tra đơn đặt phòng trùng lặp
+    private function checkRoomConflict($roomId, $bookingDate, $startPeriodId, $endPeriodId, $excludeBookingId = null)
+    {
+        $query = RoomBooking::where('room_id', $roomId)
+            ->where('booking_date', $bookingDate)
+            ->where(function ($query) use ($startPeriodId, $endPeriodId) {
+                $query->whereBetween('start_period_id', [$startPeriodId, $endPeriodId])
+                    ->orWhereBetween('end_period_id', [$startPeriodId, $endPeriodId])
+                    ->orWhere(function ($query) use ($startPeriodId, $endPeriodId) {
+                        $query->where('start_period_id', '<=', $startPeriodId)
+                            ->where('end_period_id', '>=', $endPeriodId);
+                    });
+            });
+
+        if ($excludeBookingId) {
+            $query->where('id', '!=', $excludeBookingId);
+        }
+
+        return $query->exists();
+    }
+
+    // Hiển thị form tạo mới đơn đặt phòng
+    public function create()
     {
         $rooms = Room::all();
         $periods = Period::all();
-        $devices = Device::where('quantity', '>', 0)->get();
-        $bookDevice = $request->input('book_device', 'no');
-
-        if ($rooms->isEmpty() || $periods->isEmpty()) {
-            return redirect()->back()->withErrors(['error' => 'Không có dữ liệu phòng học hoặc tiết học khả dụng.']);
-        }
-
+        $devices = Device::all();
+        $bookDevice = old('book_device', 'no'); // Giá trị mặc định là 'no'
         return view('room_bookings.store', compact('rooms', 'periods', 'devices', 'bookDevice'));
     }
 
+    // Lưu đơn đặt phòng mới
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'user_id' => 'required|exists:users,id',
+    //         'room_id' => 'required|exists:rooms,id',
+    //         'start_period_id' => 'required|exists:periods,id',
+    //         'end_period_id' => 'required|exists:periods,id',
+    //         'purpose' => 'required|string|max:255',
+    //         'booking_date' => 'required|date',
+    //     ]);
+
+    //     if (
+    //         $this->checkRoomConflict(
+    //             $request->room_id,
+    //             $request->booking_date,
+    //             $request->start_period_id,
+    //             $request->end_period_id
+    //         )
+    //     ) {
+    //         return redirect()->back()->withErrors(['error' => 'Phòng đã được đặt trong khoảng thời gian này.']);
+    //     }
+
+    //     RoomBooking::create([
+    //         'user_id' => $request->user_id,
+    //         'room_id' => $request->room_id,
+    //         'start_period_id' => $request->start_period_id,
+    //         'end_period_id' => $request->end_period_id,
+    //         'booking_date' => $request->booking_date,
+    //         'purpose' => $request->purpose,
+    //         'status' => 'Chờ duyệt',
+    //     ]);
+
+    //     // Cập nhật trạng thái phòng
+    //     $this->updateRoomStatus($request->room_id);
+
+    //     return redirect()->route('room_bookings.timetable')
+    //         ->with('success', 'Đơn đặt phòng đã được tạo thành công.');
+    // }
+
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'room_id' => 'required|exists:rooms,id',
             'start_period_id' => 'required|exists:periods,id',
             'end_period_id' => 'required|exists:periods,id',
             'purpose' => 'required|string|max:255',
-            'devices' => 'nullable|array',
-            'devices.*' => 'exists:devices,id',
-            'device_quantity' => 'nullable|array',
-            'device_quantity.*' => 'integer|min:1',
+            'booking_date' => 'required|date',
         ]);
 
-        if ($validated['start_period_id'] > $validated['end_period_id']) {
-            return redirect()->back()->withErrors(['error' => 'Tiết bắt đầu không thể lớn hơn tiết kết thúc.']);
+        if (
+            $this->checkRoomConflict(
+                $request->room_id,
+                $request->booking_date,
+                $request->start_period_id,
+                $request->end_period_id
+            )
+        ) {
+            return redirect()->back()->withErrors(['error' => 'Phòng đã được đặt trong khoảng thời gian này.']);
         }
 
-        $booking = RoomBooking::create([
-            'room_id' => $validated['room_id'],
-            'start_period_id' => $validated['start_period_id'],
-            'end_period_id' => $validated['end_period_id'],
-            'purpose' => $validated['purpose'],
+        $roomBooking = RoomBooking::create([
+            'user_id' => auth()->id(),
+            'room_id' => $request->room_id,
+            'start_period_id' => $request->start_period_id,
+            'end_period_id' => $request->end_period_id,
+            'booking_date' => $request->booking_date,
+            'purpose' => $request->purpose,
+            'status' => 'Chờ duyệt',
         ]);
 
-        if (!empty($validated['devices'])) {
-            foreach ($validated['devices'] as $deviceId) {
-                $quantity = $validated['device_quantity'][$deviceId] ?? 0;
-                $device = Device::find($deviceId);
-
-                if (!$device || $device->quantity < $quantity) {
-                    return redirect()->back()->withErrors([
-                        'devices' => "Thiết bị {$device->device_name} không đủ số lượng khả dụng."
-                    ]);
-                }
-
-                $booking->devices()->attach($deviceId, ['quantity' => $quantity]);
-                $device->decrement('quantity', $quantity);
+        if ($request->book_device === 'yes') {
+            foreach ($request->devices as $deviceId => $device) {
+                $roomBooking->devices()->attach($deviceId, ['quantity' => $request->device_quantity[$deviceId]]);
             }
         }
 
-        return redirect()->route('room_bookings.timetable')->with('success', 'Đặt phòng thành công!');
+        $this->updateRoomStatus($request->room_id);
+
+        return redirect()->route('room_bookings.timetable')
+            ->with('success', 'Đơn đặt phòng đã được tạo thành công.');
     }
 
-
-    // Hiển thị bảng lịch sử đặt phòng
-    public function timetable()
+    // Hiển thị form chỉnh sửa đơn đặt phòng
+    public function edit($id)
     {
-        $roomBookings = RoomBooking::with(['user', 'room', 'startPeriod', 'endPeriod'])->get();
-        return view('room_bookings.timetable', compact('roomBookings'));
+        $booking = RoomBooking::findOrFail($id);
+        $rooms = Room::all();
+        $periods = Period::all();
+        $devices = Device::all();
+        return view('room_bookings.edit', compact('booking', 'rooms', 'periods', 'devices'));
     }
 
-    // Hiển thị trang duyệt đơn của admin
-    public function adminApproval()
-    {
-        $pendingBookings = RoomBooking::with(['room', 'user', 'devices'])
-            ->where('status', 'Chờ duyệt')
-            ->get();
-
-        return view('room_bookings.admin_approval', compact('pendingBookings'));
-    }
-
-    // Cập nhật trạng thái đơn đặt phòng bởi admin
-    public function updateStatus(Request $request, $id)
+    // Cập nhật đơn đặt phòng
+    public function update(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:Chờ duyệt,Từ chối duyệt,Đang sử dụng,Đã trả phòng',
+            'room_id' => 'required|exists:rooms,id',
+            'start_period_id' => 'required|exists:periods,id',
+            'end_period_id' => 'required|exists:periods,id',
+            'purpose' => 'required|string|max:255',
+            'booking_date' => 'required|date',
         ]);
 
         $booking = RoomBooking::findOrFail($id);
-        $booking->update(['status' => $request->status]);
 
-        return redirect()->route('admin.room_bookings.approval')
-            ->with('success', 'Cập nhật trạng thái đơn đặt phòng thành công.');
-    }
+        if (
+            $this->checkRoomConflict(
+                $request->room_id,
+                $request->booking_date,
+                $request->start_period_id,
+                $request->end_period_id,
+                $id
+            )
+        ) {
+            return redirect()->back()->withErrors(['error' => 'Phòng đã được đặt trong khoảng thời gian này.']);
+        }
 
-    // Cập nhật thông tin đơn đặt phòng
-    public function update(Request $request, RoomBooking $roomBooking)
-    {
-        $request->validate([
-            'user_id' => 'required',
-            'room_id' => 'required',
-            'start_period_id' => 'required',
-            'end_period_id' => 'required',
-            'booking_date' => 'required|date',
-            'status' => 'required',
-            'purpose' => 'required',
+        $booking->update([
+            'room_id' => $request->room_id,
+            'start_period_id' => $request->start_period_id,
+            'end_period_id' => $request->end_period_id,
+            'booking_date' => $request->booking_date,
+            'purpose' => $request->purpose,
         ]);
 
-        $roomBooking->update($request->all());
-        return redirect()->route('admin.room_bookings.index')->with('success', 'Cập nhật đơn đặt phòng thành công!');
+        // Cập nhật trạng thái phòng
+        $this->updateRoomStatus($request->room_id);
+
+        return redirect()->route('room_bookings.timetable')
+            ->with('success', 'Cập nhật đơn đặt phòng thành công.');
     }
 
     // Xóa đơn đặt phòng
-    public function destroy(RoomBooking $roomBooking)
+    public function destroy($id)
     {
-        $roomBooking->delete();
-        return redirect()->route('admin.room_bookings.index')->with('success', 'Đơn đặt phòng đã được xóa!');
+        $booking = RoomBooking::findOrFail($id);
+        $roomId = $booking->room_id;
+
+        $booking->delete();
+
+        // Cập nhật trạng thái phòng
+        $this->updateRoomStatus($roomId);
+
+        return redirect()->route('room_bookings.timetable')
+            ->with('success', 'Đã xóa đơn đặt phòng thành công.');
+    }
+
+    // Cập nhật trạng thái phòng
+    private function updateRoomStatus($roomId)
+    {
+        $activeBooking = RoomBooking::where('room_id', $roomId)
+            ->where('status', 'Đang sử dụng')
+            ->exists();
+
+        $room = Room::findOrFail($roomId);
+
+        if ($activeBooking) {
+            $room->update(['status' => 'Đang sử dụng']);
+        } else {
+            $room->update(['status' => 'Còn trống']);
+        }
     }
 }

@@ -16,58 +16,74 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'required|numeric',
+        // Xác thực dữ liệu đầu vào
+        $request->validate([
+            'name' => 'required|string|max:255|unique:users,name', // Kiểm tra tên tài khoản trùng
             'role' => 'required|in:Admin,Giáo viên',
+            'phone' => 'required|numeric|unique:users,phone', // Kiểm tra số điện thoại trùng
+            'email' => 'required|email|max:255|unique:users,email', // Kiểm tra email trùng
+            'password' => 'required|min:8|confirmed', // Mật khẩu mới phải trùng với mật khẩu xác nhận
+        ], [
+            'name.unique' => 'Tên tài khoản đã tồn tại.',
+            'email.unique' => 'Địa chỉ email đã tồn tại.',
+            'phone.unique' => 'Số điện thoại đã tồn tại.',
+            'password.confirmed' => 'Mật khẩu mới và mật khẩu xác nhận không khớp.',
         ]);
 
-        User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'],
-            'role' => $validated['role'],
-            'password' => Hash::make('password123'), // Mặc định gán mật khẩu
+        // Tạo tài khoản mới
+        $user = User::create([
+            'name' => $request->name,
+            'role' => $request->role,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'password' => Hash::make($request->password), // Mã hóa mật khẩu
         ]);
 
-        return redirect()->route('admin.users.index')->with('success', 'Tài khoản đã được thêm thành công!');
+        return redirect()->route('admin.users.index')->with('status', 'account-created');
     }
 
-
-    /**
-     * Hiển thị form chỉnh sửa thiết bị.
-     */
     public function edit(user $user)
     {
         return view('admin.users.edit', compact('user'));
     }
 
-    /**
-     * Cập nhật thông tin thiết bị.
-     */
-    public function update(Request $request, user $user)
+    public function update(Request $request, User $user)
     {
-        // Validate dữ liệu
+        // Xác thực dữ liệu đầu vào
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:users,name,' . $user->id,
             'role' => 'required|in:Admin,Giáo viên',
-            'phone' => 'required|integer|min:10|max:12',
-            'email' => 'required|string|max:255',
+            'phone' => 'required|numeric|unique:users,phone,' . $user->id,
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'current_password' => 'nullable|current_password',
+            'password' => 'nullable|min:8|confirmed',
+        ], [
+            'name.unique' => 'Tên tài khoản đã tồn tại.',
+            'email.unique' => 'Địa chỉ email đã tồn tại.',
+            'phone.unique' => 'Số điện thoại đã tồn tại.',
+            'password.confirmed' => 'Mật khẩu mới và mật khẩu xác nhận không khớp.',
+            'current_password.current_password' => 'Mật khẩu cũ không đúng.',
         ]);
 
-        // Cập nhật thiết bị
-        $user->update([
-            'name' => $request->input('name'),
-            'role' => $request->input('role'),
-            'phone' => $request->input('phone'),
-            'email' => $request->input('email'),
-        ]);
+        // Kiểm tra mật khẩu cũ nếu có thay đổi mật khẩu
+        if ($request->filled('current_password')) {
+            if (!Hash::check($request->current_password, $user->password)) {
+                return back()->withErrors(['current_password' => 'Mật khẩu cũ không đúng.']);
+            }
+        }
 
-        // Chuyển hướng về trang quản lý thiết bị với thông báo thành công
-        return redirect()->route('admin.users.index')->with('status', 'Đã chỉnh sửa thông tin tài khoản');
+        // Cập nhật thông tin tài khoản
+        $user->update($request->only(['name', 'role', 'phone', 'email']));
+
+        // Nếu có mật khẩu mới, tiến hành cập nhật
+        if ($request->filled('password')) {
+            $user->update([
+                'password' => bcrypt($request->password),
+            ]);
+        }
+
+        return redirect()->route('admin.users.edit', $user)->with('status', 'profile-updated');
     }
-
 
     public function destroy(user $user)
     {
