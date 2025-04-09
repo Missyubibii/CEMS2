@@ -115,26 +115,15 @@
                 <div class="mt-4">
                     <div class="flex items-center justify-between">
                         <!-- Hiển thị thông tin về số trang -->
-                        <div class="text-sm text-gray-700">
-                            @if ($devices->total() > 0)
-                                Hiển thị từ
-                                <span class="font-medium">{{ $devices->firstItem() }}</span>
-                                đến
-                                <span class="font-medium">{{ $devices->lastItem() }}</span>
-                                trong tổng số
-                                <span class="font-medium">{{ $devices->total() }}</span>
-                                thiết bị
-                            @else
-                                Không có thiết bị nào
-                            @endif
+                        <div class="text-sm text-gray-500">
+                            Hiển thị {{ $devices->firstItem() ?? 0 }}-{{ $devices->lastItem() ?? 0 }}
+                            trong tổng số {{ $devices->total() ?? 0 }} thiết bị
                         </div>
 
                         <!-- Links phân trang -->
-                        <nav role="navigation" aria-label="Pagination Navigation" class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2 withoutComponent">
-                                {!! $devices->onEachSide(1)->links() !!}
-                            </div>
-                        </nav>
+                        <div>
+                            {{ $devices->links() }}
+                        </div>
                     </div>
                 </div>
             </div>
