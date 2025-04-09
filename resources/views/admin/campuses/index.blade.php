@@ -3,140 +3,153 @@
         {{ __('Quản lý cơ sở học') }}
     </x-slot>
 
-    <div class="p-4 sm:ml-64 sm:p-5">
-        <div class="overflow-x-auto rounded-lg ">
-            {{-- <h2 class="text-lg font-semibold">Danh sách cơ sở học</h2> --}}
+    <div class="p-4 sm:ml-64">
+        <div class="p-4 bg-white shadow sm:rounded-lg">
+            <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Danh sách cơ sở học</h2>
 
-            <div class="flex flex-col md:flex-row items-center justify-end space-y-3 md:space-y-0 md:space-x-4 p-4">
-                <div class="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0"
-                    onclick="toggleAddForm()">
-                    <button id="add_campuses_button" data-modal-target="add_campuses" data-modal-toggle="add_campuses" type="button"
-                        class="flex items-center justify-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                        <svg class="w-3.5 h-3.5 mr-2 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                            width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                        </svg>
-
-                        Thêm cơ sở học
-                    </button>
-                </div>
+            <!-- Nút thêm mới -->
+            <div class="flex justify-end mb-4">
+                <button id="add_campuses_button" data-modal-target="add_campuses" data-modal-toggle="add_campuses"
+                    type="button" onclick="toggleAddForm()"
+                    class="inline-flex items-center text-blue-600 hover:text-white border border-blue-600 hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                    <svg class="w-5 h-5 mr-1 -ml-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                            stroke-width="2" d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    Thêm cơ sở học
+                </button>
             </div>
-            <div class=" inline-block min-w-full align-middle">
-                <div class="bg-white overflow-hidden shadow sm:rounded-lg">
-                    <table class="table-auto w-full mt-4 divide-y divide-gray-200 dark:divide-gray-600">
-                        <thead>
-                            <tr>
-                                <th scope="col" class="p-4 text-s tracking-wider text-left text-black uppercase ">
-                                    ID
-                                </th>
-                                <th scope="col" class="p-4 text-s tracking-wider text-left text-black uppercase ">
-                                    Tên cơ sở
-                                </th>
-                                <th scope="col" class="p-4 text-s tracking-wider text-left text-black uppercase ">
-                                    Hành động
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-gray-800">
-                            @foreach($campuses as $campus)
-                                <tr>
-                                    <td class="p-4 text-sm font-normal text-gray-900 whitespace-nowrap dark:text-white">
-                                        <span class="font-semibold">{{ $campus->id }}</span>
-                                    </td>
-                                    <td class="p-4 text-sm font-normal text-gray-900 whitespace-nowrap dark:text-white">
-                                        {{ $campus->campus_name }}
-                                    </td>
-                                    <td class="p-4 space-x-2 whitespace-nowrap">
-                                        <a href="{{ route('admin.campuses.edit', $campus) }}"
-                                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300">
-                                            <svg class="w-3.5 h-3.5 mr-2 text-gray-300 dark:text-white"
-                                                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
-                                                height="24" fill="currentColor" viewBox="0 0 24 24">
-                                                <path fill-rule="evenodd"
-                                                    d="M11.32 6.176H5c-1.105 0-2 .949-2 2.118v10.588C3 20.052 3.895 21 5 21h11c1.105 0 2-.948 2-2.118v-7.75l-3.914 4.144A2.46 2.46 0 0 1 12.81 16l-2.681.568c-1.75.37-3.292-1.263-2.942-3.115l.536-2.839c.097-.512.335-.983.684-1.352l2.914-3.086Z"
-                                                    clip-rule="evenodd" />
-                                                <path fill-rule="evenodd"
-                                                    d="M19.846 4.318a2.148 2.148 0 0 0-.437-.692 2.014 2.014 0 0 0-.654-.463 1.92 1.92 0 0 0-1.544 0 2.014 2.014 0 0 0-.654.463l-.546.578 2.852 3.02.546-.579a2.14 2.14 0 0 0 .437-.692 2.244 2.244 0 0 0 0-1.635ZM17.45 8.721 14.597 5.7 9.82 10.76a.54.54 0 0 0-.137.27l-.536 2.84c-.07.37.239.696.588.622l2.682-.567a.492.492 0 0 0 .255-.145l4.778-5.06Z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
 
+            <!-- Bảng danh sách -->
+            <div class="relative overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">ID</th>
+                            <th scope="col" class="px-6 py-3">Tên cơ sở</th>
+                            <th scope="col" class="px-6 py-3">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($campuses as $campus)
+                            <tr class="bg-white border-b hover:bg-gray-50">
+                                <td class="px-6 py-4 font-semibold">{{ $campus->id }}</td>
+                                <td class="px-6 py-4">{{ $campus->campus_name }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center space-x-2">
+                                        <a href="{{ route('admin.campuses.edit', $campus) }}"
+                                            class="text-blue-600 inline-flex items-center hover:text-white border border-blue-600 hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center">
+                                            <svg class="w-3.5 h-3.5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
+                                            </svg>
                                             Sửa
                                         </a>
-                                        <button
-                                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300"
-                                            onclick="document.getElementById('delete-{{ $campus->id }}').submit();">
-                                            <svg class="w-3.5 h-3.5 mr-2 text-gray-300 dark:text-white"
-                                                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
-                                                height="24" fill="currentColor" viewBox="0 0 24 24">
-                                                <path fill-rule="evenodd"
-                                                    d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z"
-                                                    clip-rule="evenodd" />
+                                        <button data-modal-target="deleteModal-{{ $campus->id }}"
+                                            data-modal-toggle="deleteModal-{{ $campus->id }}"
+                                            class="text-red-600 inline-flex items-center hover:text-white border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-3 py-2 text-center">
+                                            <svg class="w-3.5 h-3.5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
                                             </svg>
                                             Xóa
                                         </button>
-                                        <form id="delete-{{ $campus->id }}" method="POST"
-                                            action="{{ route('admin.campuses.destroy', $campus) }}" style="display: none;">
-                                            @csrf
-                                            @method('DELETE')
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                    </div>
+                                </td>
+                            </tr>
 
-            <form id="add_campuses" tabindex="-1" aria-hidden="true"
-                class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full">
-                <div class="relative p-4 w-full max-w-2xl h-full md:h-auto">
-                    <!-- Modal content -->
-                    <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
-                        <!-- Modal header -->
-                        <div
-                            class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                Thêm cơ sở học
-                            </h3>
-                            <button type="button"
-                                class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                                data-modal-toggle="add_campuses">
-                                <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd"
-                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
-                                <span class="sr-only">Đóng cửa sổ</span>
-                            </button>
-                        </div>
-                        <!-- Modal body -->
-                        <form method="POST" action="{{ route('admin.campuses.store') }}">
-                            @csrf
-                            <div class="grid gap-4 mb-4 sm:grid-cols-2">
-                                <div>
-                                    <label for="campus_name"
-                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tên cơ sở</label>
-                                    <input type="text" id="campus_name" name="campus_name" required
-                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                        placeholder="Nhập tên cơ sở">
+                            <!-- Modal xóa -->
+                            <div id="deleteModal-{{ $campus->id }}" tabindex="-1"
+                                class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                                <div class="relative p-4 w-full max-w-md max-h-full">
+                                    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                                        <div class="p-4 md:p-5 text-center">
+                                            <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                                                Bạn có chắc chắn muốn xóa cơ sở học này?
+                                            </h3>
+                                            <form action="{{ route('admin.campuses.destroy', $campus) }}" method="POST" class="inline-flex">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                                                    Xóa
+                                                </button>
+                                                <button type="button"
+                                                    class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10"
+                                                    data-modal-hide="deleteModal-{{ $campus->id }}">
+                                                    Hủy
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <button type="submit"
-                                class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                <svg class="mr-1 -ml-1 w-6 h-6" fill="currentColor" viewBox="0 0 20 20"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd"
-                                        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
-                                Thêm cơ sở
-                            </button>
-                        </form>
+                        @endforeach
+                    </tbody>
+                </table>
+
+                <!-- Phân trang -->
+                <div class="mt-4">
+                    <div class="flex items-center justify-between">
+                        <!-- Hiển thị thông tin về số trang -->
+                        <div class="text-sm text-gray-500">
+                            Hiển thị {{ $campuses->firstItem() ?? 0 }}-{{ $campuses->lastItem() ?? 0 }}
+                            trong tổng số {{ $campuses->total() ?? 0 }} cơ sở học
+                        </div>
+
+                        <!-- Links phân trang -->
+                        <div>
+                            {{ $campuses->links() }}
+                        </div>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
+
+    <!-- Form thêm mới -->
+    <form id="add_campuses" tabindex="-1" aria-hidden="true"
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-2xl max-h-full">
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
+                    <h3 class="text-lg font-semibold text-gray-900">
+                        Thêm cơ sở học mới
+                    </h3>
+                    <button type="button"
+                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                        data-modal-toggle="add_campuses">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-4 md:p-5">
+                    <form method="POST" action="{{ route('admin.campuses.store') }}">
+                        @csrf
+                        <div class="grid gap-4 mb-4">
+                            <div>
+                                <label for="campus_name" class="block mb-2 text-sm font-medium text-gray-900">
+                                    Tên cơ sở học
+                                </label>
+                                <input type="text" id="campus_name" name="campus_name" required
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5"
+                                    placeholder="Nhập tên cơ sở học">
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <button type="submit"
+                                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                                Thêm cơ sở học
+                            </button>
+                            <button type="button"
+                                class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900"
+                                data-modal-hide="add_campuses">
+                                Hủy
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </form>
 </x-app-layout>

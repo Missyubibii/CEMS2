@@ -9,12 +9,15 @@ use App\Models\User;
 use App\Models\Device;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AdminRoomBookingController extends Controller
 {
     public function index()
     {
-        $roomBookings = RoomBooking::with('user', 'room', 'startPeriod', 'endPeriod')->get();
+        $roomBookings = RoomBooking::with(['user', 'room', 'startPeriod', 'endPeriod', 'devices'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
         return view('admin.room_bookings.index', compact('roomBookings'));
     }
 
@@ -39,7 +42,6 @@ class AdminRoomBookingController extends Controller
             'devices.*' => 'exists:devices,id',
             'devices.*.quantity' => 'required|integer|min:1',
         ]);
-
 
         $room = Room::find($request->room_id);
         if ($room && $room->status !== 'Còn trống') {
@@ -72,6 +74,10 @@ class AdminRoomBookingController extends Controller
         // Gắn thiết bị cho đơn đặt phòng nếu có
         if ($request->has('devices')) {
             foreach ($request->devices as $deviceId => $quantity) {
+                $device = Device::find($deviceId);
+                if (!$device || $device->quantity < $quantity) {
+                    return redirect()->back()->withErrors(['devices' => "Số lượng thiết bị không đủ."]);
+                }
                 $roomBooking->devices()->attach($deviceId, ['quantity' => $quantity]);
             }
         }
@@ -110,11 +116,35 @@ class AdminRoomBookingController extends Controller
     public function approve(RoomBooking $roomBooking)
     {
         if ($roomBooking->status === 'Chờ duyệt') {
-            $roomBooking->update(['status' => 'Đang sử dụng']);
-            return redirect()->route('admin.room_bookings.index')->with('success', 'Đơn đặt phòng đã được duyệt.');
+            try {
+                DB::beginTransaction();
+
+                // Check device quantities
+                foreach ($roomBooking->devices as $device) {
+                    if ($device->quantity < $device->pivot->quantity) {
+                        DB::rollBack();
+                        return redirect()->route('admin.room_bookings.index')
+                            ->with('error', "Số lượng thiết bị {$device->device_name} không đủ.");
+                    }
+
+                    // Deduct quantities
+                    $device->decrement('quantity', $device->pivot->quantity);
+                }
+
+                $roomBooking->update(['status' => 'Đang sử dụng']);
+                DB::commit();
+
+                return redirect()->route('admin.room_bookings.index')
+                    ->with('success', 'Đơn đặt phòng đã được duyệt và số lượng thiết bị đã được cập nhật.');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->route('admin.room_bookings.index')
+                    ->with('error', 'Có lỗi xảy ra khi duyệt đơn đặt phòng.');
+            }
         }
 
-        return redirect()->route('admin.room_bookings.index')->with('error', 'Đơn đặt phòng không thể duyệt.');
+        return redirect()->route('admin.room_bookings.index')
+            ->with('error', 'Đơn đặt phòng không thể duyệt.');
     }
 
     public function reject(RoomBooking $roomBooking)
@@ -132,14 +162,27 @@ class AdminRoomBookingController extends Controller
 
     public function returnRoom(RoomBooking $roomBooking)
     {
-        $roomBooking->update([
-            'status' => 'Đã trả phòng',
-            'room_status' => 'Còn trống'
-        ]);
+        try {
+            DB::beginTransaction();
 
-        return redirect()->route('admin.room_bookings.index')->with('success', 'Phòng đã được trả.');
+            // Return device quantities if there were any devices booked
+            foreach ($roomBooking->devices as $device) {
+                $device->increment('quantity', $device->pivot->quantity);
+            }
+
+            $roomBooking->update([
+                'status' => 'Đã trả phòng',
+                'room_status' => 'Còn trống'
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.room_bookings.index')
+                ->with('success', 'Phòng đã được trả và số lượng thiết bị đã được hoàn lại.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('admin.room_bookings.index')
+                ->with('error', 'Có lỗi xảy ra khi trả phòng.');
+        }
     }
-
 }
-
-
